@@ -1,0 +1,25 @@
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 40px;
+  margin-bottom: 14px;
+}
+
+.rowWide {
+  grid-template-columns: 7fr 5fr;
+  column-gap: 20px;
+  margin-bottom: 0;
+}
+
+.note {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .row,
+  .rowWide {
+    grid-template-columns: 1fr;
+  }
+}

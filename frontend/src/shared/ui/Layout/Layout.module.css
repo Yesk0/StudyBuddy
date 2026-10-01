@@ -1,0 +1,32 @@
+.sectionLabel {
+  margin: 0 0 22px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.divider {
+  height: 1px;
+  margin: 28px 0;
+  border: none;
+  background: var(--color-border);
+}
+
+.infoBox {
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--color-bg);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.infoTitle {
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}

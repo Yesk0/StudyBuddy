@@ -1,0 +1,29 @@
+.sectionLabel {
+  margin-bottom: 36px;
+}
+
+.groupTitle {
+  margin-bottom: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--color-text);
+}
+
+.group {
+  margin-bottom: 40px;
+}
+
+.days {
+  gap: 12px;
+}
+
+.divider {
+  margin-top: 44px;
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  min-height: 74px;
+}
