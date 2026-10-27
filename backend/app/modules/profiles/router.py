@@ -1,23 +1,35 @@
-from fastapi import APIRouter, status
+from typing import Annotated
 
-from app.modules.profiles.dependencies import ProfileServiceDep
-from app.modules.profiles.schemas import ProfileCreate, ProfileRead, ProfileUpdate
+from fastapi import APIRouter, HTTPException, Query, status
 
-router = APIRouter(prefix="/profiles", tags=["profiles"])
+from app.core.database import DbSession
+from app.modules.auth.dependencies import CurrentUser
+from app.modules.profiles import service
+from app.modules.profiles.schemas import CourseRead, ProfileRead, ProfileUpdate
 
-
-@router.post("", response_model=ProfileRead, status_code=status.HTTP_201_CREATED)
-def create_profile(data: ProfileCreate, service: ProfileServiceDep) -> ProfileRead:
-    return service.create(data)
-
-
-@router.get("/{profile_id}", response_model=ProfileRead)
-def get_profile(profile_id: int, service: ProfileServiceDep) -> ProfileRead:
-    return service.get(profile_id)
+router = APIRouter(tags=["profiles"])
 
 
-@router.put("/{profile_id}", response_model=ProfileRead)
-def update_profile(
-    profile_id: int, data: ProfileUpdate, service: ProfileServiceDep
+@router.get("/profiles/me", response_model=ProfileRead)
+async def get_my_profile(user: CurrentUser, session: DbSession) -> ProfileRead:
+    profile = await service.get_profile(session, user.id)
+    if profile is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Profile not found")
+    return service.to_read(profile, user.email)
+
+
+@router.put("/profiles/me", response_model=ProfileRead)
+async def update_my_profile(
+    data: ProfileUpdate, user: CurrentUser, session: DbSession
 ) -> ProfileRead:
-    return service.update(profile_id, data)
+    return await service.upsert_profile(session, user, data)
+
+
+@router.get("/courses", response_model=list[CourseRead])
+async def search_courses(
+    _: CurrentUser,
+    session: DbSession,
+    search: Annotated[str, Query(max_length=120)] = "",
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+) -> list[CourseRead]:
+    return await service.search_courses(session, search, limit)
