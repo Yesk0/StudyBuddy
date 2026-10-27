@@ -1,18 +1,39 @@
-import sqlite3
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
+from typing import Annotated
 
-from app.core.config import DATABASE_PATH
+from fastapi import Depends
+from sqlalchemy import MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
+
+from app.core.config import settings
+
+NAMING_CONVENTION = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
 
 
-def connect() -> sqlite3.Connection:
-    connection = sqlite3.connect(DATABASE_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
+class Base(DeclarativeBase):
+    metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
 
-def get_connection() -> Iterator[sqlite3.Connection]:
-    connection = connect()
-    try:
-        yield connection
-    finally:
-        connection.close()
+_is_sqlite = settings.database_url.startswith("sqlite")
+
+engine = create_async_engine(
+    settings.database_url,
+    **({"poolclass": NullPool} if _is_sqlite else {"pool_pre_ping": True}),
+)
+SessionFactory = async_sessionmaker(engine, expire_on_commit=False)
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with SessionFactory() as session:
+        yield session
+
+
+DbSession = Annotated[AsyncSession, Depends(get_session)]
