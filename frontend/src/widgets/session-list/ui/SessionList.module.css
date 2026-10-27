@@ -1,0 +1,17 @@
+.group + .group {
+  margin-top: 36px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.muted {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.pastToggle {
+  margin-top: 36px;
+}

@@ -1,0 +1,102 @@
+.window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.back {
+  display: none;
+}
+
+.identity {
+  flex: 1;
+  min-width: 160px;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.meta {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.messages {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.day {
+  align-self: center;
+  margin: 8px 0;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.session {
+  width: min(460px, 100%);
+}
+
+.sessionRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.sessionMine {
+  justify-content: flex-end;
+}
+
+.start {
+  margin: auto;
+  max-width: 360px;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 75%;
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 900px) {
+  .back {
+    display: inline-flex;
+  }
+
+  .messages,
+  .header,
+  .bottom {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

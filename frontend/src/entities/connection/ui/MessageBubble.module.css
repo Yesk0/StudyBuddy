@@ -1,0 +1,35 @@
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 100%;
+}
+
+.mine {
+  align-items: flex-end;
+}
+
+.bubble {
+  max-width: min(520px, 85%);
+  padding: 10px 14px;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--color-bg);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.mine .bubble {
+  border-radius: 16px 16px 4px 16px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.time {
+  margin-top: 4px;
+  padding: 0 4px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
