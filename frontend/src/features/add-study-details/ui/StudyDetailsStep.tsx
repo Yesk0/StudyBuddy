@@ -1,6 +1,16 @@
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useId, useRef, useState, type KeyboardEvent } from 'react'
+import { useCourseSearch } from '@/entities/course'
 import type { ProfileDraft } from '@/entities/profile'
-import { Chip, ChipGroup, Divider, FormCard, InfoBox, SectionLabel, TextField } from '@/shared/ui'
+import {
+  Chip,
+  ChipGroup,
+  Divider,
+  FormCard,
+  InfoBox,
+  MOCKUP_FIELD_TEXT,
+  SectionLabel,
+  TextField,
+} from '@/shared/ui'
 import styles from './StudyDetailsStep.module.css'
 
 type StudyDetailsStepProps = {
@@ -16,6 +26,9 @@ export function StudyDetailsStep({ draft, onChange, onNext, onBack }: StudyDetai
   const [courseInput, setCourseInput] = useState('')
   const [errors, setErrors] = useState<StudyDetailsErrors>({})
   const courseInputRef = useRef<HTMLInputElement>(null)
+  const suggestionsId = useId()
+  // Suggest courses other students already added, so the same course gets the same name.
+  const { data: suggestions = [] } = useCourseSearch(courseInput)
 
   const addCourse = () => {
     const course = courseInput.trim()
@@ -59,6 +72,7 @@ export function StudyDetailsStep({ draft, onChange, onNext, onBack }: StudyDetai
     >
       <SectionLabel>Your studies</SectionLabel>
       <TextField
+        {...MOCKUP_FIELD_TEXT}
         className={styles.field}
         title="Major or program"
         placeholder="e.g. Computer Science"
@@ -70,14 +84,24 @@ export function StudyDetailsStep({ draft, onChange, onNext, onBack }: StudyDetai
         }}
       />
       <TextField
+        {...MOCKUP_FIELD_TEXT}
         ref={courseInputRef}
         title="Add a course"
         placeholder="Search courses or enter a course name"
+        list={suggestionsId}
+        autoComplete="off"
         value={courseInput}
         error={errors.courses}
         onChange={setCourseInput}
         onKeyDown={handleCourseKeyDown}
       />
+      <datalist id={suggestionsId}>
+        {suggestions
+          .filter((course) => !draft.courses.includes(course.name))
+          .map((course) => (
+            <option key={course.id} value={course.name} />
+          ))}
+      </datalist>
 
       <SectionLabel className={styles.coursesLabel}>Your courses</SectionLabel>
       {draft.courses.length > 0 && (

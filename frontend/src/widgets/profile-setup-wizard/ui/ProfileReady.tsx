@@ -1,4 +1,5 @@
-import { FormCard } from '@/shared/ui'
+import { ROUTES } from '@/shared/config'
+import { FormCard, ForwardLink } from '@/shared/ui'
 import styles from './ProfileReady.module.css'
 
 const PROFILE_INCLUDES = ['University email', 'Major and courses', 'Study format and available days']
@@ -24,6 +25,7 @@ export function ProfileReady({ onEdit }: { onEdit: () => void }) {
       subtitle="You’re all set to find your first study partner."
       submitLabel="Edit profile"
       onSubmit={onEdit}
+      footerStart={<ForwardLink to={ROUTES.matches}>Find study partners</ForwardLink>}
     >
       <div className={styles.badge}>
         <CheckIcon size={36} strokeWidth={3} />

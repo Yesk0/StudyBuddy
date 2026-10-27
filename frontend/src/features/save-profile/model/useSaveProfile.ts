@@ -1,26 +1,30 @@
-import { useState } from 'react'
-import { createProfile, toProfileDto, updateProfile, type ProfileDraft } from '@/entities/profile'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { matchKeys } from '@/entities/match'
+import { profileKeys, saveMyProfile, toProfileDto, type ProfileDraft } from '@/entities/profile'
+import { viewerKeys } from '@/entities/viewer'
+import { errorMessage } from '@/shared/api'
 
 export function useSaveProfile() {
-  const [profileId, setProfileId] = useState<number | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    mutationFn: (draft: ProfileDraft) => saveMyProfile(toProfileDto(draft)),
+    onSuccess: (profile) => {
+      queryClient.setQueryData(profileKeys.me, profile)
+      queryClient.invalidateQueries({ queryKey: viewerKeys.me })
+      queryClient.invalidateQueries({ queryKey: matchKeys.all })
+    },
+  })
 
-  const save = async (draft: ProfileDraft): Promise<boolean> => {
-    setSaving(true)
-    setError(null)
-    try {
-      const dto = toProfileDto(draft)
-      const profile = profileId === null ? await createProfile(dto) : await updateProfile(profileId, dto)
-      setProfileId(profile.id)
-      return true
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not save your profile')
-      return false
-    } finally {
-      setSaving(false)
-    }
+  return {
+    save: async (draft: ProfileDraft): Promise<boolean> => {
+      try {
+        await mutation.mutateAsync(draft)
+        return true
+      } catch {
+        return false
+      }
+    },
+    saving: mutation.isPending,
+    error: mutation.isError ? errorMessage(mutation.error, 'Could not save your profile') : null,
   }
-
-  return { save, saving, error }
 }

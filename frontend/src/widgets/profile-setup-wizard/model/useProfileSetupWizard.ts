@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { EMPTY_PROFILE_DRAFT, type ProfileDraft } from '@/entities/profile'
+import type { ProfileDraft } from '@/entities/profile'
 import { useSaveProfile } from '@/features/save-profile'
 
 export const TOTAL_STEPS = 3
@@ -13,9 +13,15 @@ const STEP_NUMBER: Record<WizardStep, number> = {
   ready: 3,
 }
 
-export function useProfileSetupWizard() {
+type Options = {
+  initialDraft: ProfileDraft
+  /** Called after a successful save. Without it the wizard shows the "profile is ready" screen. */
+  onSaved?: () => void
+}
+
+export function useProfileSetupWizard({ initialDraft, onSaved }: Options) {
   const [step, setStep] = useState<WizardStep>('basic-info')
-  const [draft, setDraft] = useState<ProfileDraft>(EMPTY_PROFILE_DRAFT)
+  const [draft, setDraft] = useState<ProfileDraft>(initialDraft)
   const { save, saving, error } = useSaveProfile()
 
   const updateDraft = (patch: Partial<ProfileDraft>) => {
@@ -23,7 +29,9 @@ export function useProfileSetupWizard() {
   }
 
   const finish = async () => {
-    if (await save(draft)) setStep('ready')
+    if (!(await save(draft))) return
+    if (onSaved) onSaved()
+    else setStep('ready')
   }
 
   return {

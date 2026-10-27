@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { YEAR_OPTIONS, type ProfileDraft } from '@/entities/profile'
-import { Divider, FormCard, SectionLabel, SelectField, TextField } from '@/shared/ui'
+import {
+  Divider,
+  FormCard,
+  MOCKUP_FIELD_TEXT,
+  SectionLabel,
+  SelectField,
+  TextField,
+} from '@/shared/ui'
 import { validateBasicInfo, type BasicInfoErrors } from '../model/validateBasicInfo'
 import styles from './BasicInfoStep.module.css'
 
@@ -34,6 +41,7 @@ export function BasicInfoStep({ draft, onChange, onNext }: BasicInfoStepProps) {
       <SectionLabel>Basic information</SectionLabel>
       <div className={styles.row}>
         <TextField
+          {...MOCKUP_FIELD_TEXT}
           title="Full name"
           placeholder="Your name"
           autoComplete="name"
@@ -41,18 +49,21 @@ export function BasicInfoStep({ draft, onChange, onNext }: BasicInfoStepProps) {
           error={errors.fullName}
           onChange={(value) => update('fullName', value)}
         />
+        {/* The account email is the verified identity, so it is shown but not editable. */}
         <TextField
+          {...MOCKUP_FIELD_TEXT}
           title="University email"
           type="email"
           placeholder="name@university.edu"
-          autoComplete="email"
+          readOnly
           value={draft.email}
           error={errors.email}
-          onChange={(value) => update('email', value)}
+          onChange={() => {}}
         />
       </div>
       <div className={`${styles.row} ${styles.rowWide}`}>
         <TextField
+          {...MOCKUP_FIELD_TEXT}
           title="University"
           placeholder="Search for your university"
           autoComplete="organization"
@@ -61,6 +72,7 @@ export function BasicInfoStep({ draft, onChange, onNext }: BasicInfoStepProps) {
           onChange={(value) => update('university', value)}
         />
         <SelectField
+          {...MOCKUP_FIELD_TEXT}
           title="Year of study"
           placeholder="Select year"
           options={YEAR_OPTIONS}
