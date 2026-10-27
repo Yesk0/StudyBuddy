@@ -1,0 +1,14 @@
+.filters {
+  margin-bottom: 20px;
+}
+
+.list {
+  display: grid;
+  gap: 16px;
+}
+
+.status {
+  margin-right: auto;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

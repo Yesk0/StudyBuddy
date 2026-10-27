@@ -1,0 +1,5 @@
+.error {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--color-error);
+}
