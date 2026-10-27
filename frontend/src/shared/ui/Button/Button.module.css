@@ -1,34 +1,93 @@
-.primary {
+.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 96px;
-  padding: 0 48px;
-  border: none;
-  border-radius: 48px;
-  background: var(--color-primary);
-  font-family: var(--font-material);
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 32px;
-  color: var(--color-on-primary);
+  gap: 8px;
+  border: 1px solid transparent;
   white-space: nowrap;
-  transition: box-shadow 0.15s, opacity 0.15s;
+  text-decoration: none;
+  transition:
+    box-shadow 0.15s,
+    opacity 0.15s,
+    background-color 0.15s,
+    border-color 0.15s;
 }
 
-.primary:hover {
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
-}
-
-.primary:focus-visible {
+.button:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 3px;
 }
 
-.primary:disabled {
-  opacity: 0.7;
+.button:disabled {
+  opacity: 0.6;
   cursor: default;
   box-shadow: none;
+}
+
+/* Large Material 3 button used by the profile wizard. */
+.lg {
+  height: 96px;
+  padding: 0 48px;
+  border-radius: 48px;
+  font-family: var(--font-material);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+.md {
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sm {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 17px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.primary:hover:not(:disabled) {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+.secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  background: var(--color-bg);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-selected-bg);
+}
+
+.danger {
+  border-color: #f2c4c0;
+  background: var(--color-surface);
+  color: var(--color-error);
+}
+
+.danger:hover:not(:disabled) {
+  background: #fdf1f0;
 }
 
 .back {
@@ -41,6 +100,7 @@
   font-size: 14px;
   line-height: 18px;
   color: var(--color-text-secondary);
+  text-decoration: none;
 }
 
 .back:hover {

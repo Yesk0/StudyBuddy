@@ -1,4 +1,5 @@
 import type { FormEvent, ReactNode } from 'react'
+import { cx } from '../../lib/cx'
 import { BackButton, Button } from '../Button/Button'
 import styles from './FormCard.module.css'
 
@@ -8,8 +9,12 @@ type FormCardProps = {
   submitLabel: string
   onSubmit: () => void
   onBack?: () => void
+  /** Rendered on the left of the footer when there is no Back button. */
+  footerStart?: ReactNode
   submitting?: boolean
   error?: string | null
+  /** Drops the fixed wizard height, for short forms such as sign-in. */
+  compact?: boolean
   children: ReactNode
 }
 
@@ -19,8 +24,10 @@ export function FormCard({
   submitLabel,
   onSubmit,
   onBack,
+  footerStart,
   submitting = false,
   error,
+  compact = false,
   children,
 }: FormCardProps) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -29,7 +36,7 @@ export function FormCard({
   }
 
   return (
-    <form className={styles.card} noValidate onSubmit={handleSubmit}>
+    <form className={cx(styles.card, compact && styles.compact)} noValidate onSubmit={handleSubmit}>
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.subtitle}>{subtitle}</p>
       <div className={styles.body}>{children}</div>
@@ -39,7 +46,7 @@ export function FormCard({
         </p>
       )}
       <div className={styles.footer}>
-        {onBack && <BackButton onClick={onBack} />}
+        {onBack ? <BackButton onClick={onBack} /> : footerStart}
         <Button type="submit" className={styles.action} disabled={submitting}>
           {submitLabel}
         </Button>

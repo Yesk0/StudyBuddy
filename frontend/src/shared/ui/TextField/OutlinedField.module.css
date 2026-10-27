@@ -65,6 +65,28 @@ select.control:invalid {
   color: var(--color-on-surface-variant);
 }
 
+.multiline {
+  height: auto;
+}
+
+textarea.control {
+  display: block;
+  min-height: 88px;
+  padding: 14px 16px;
+  resize: vertical;
+  line-height: 22px;
+}
+
+.readOnly .control {
+  color: var(--color-on-surface-variant);
+  cursor: default;
+}
+
+.readOnly:focus-within {
+  border-color: var(--color-outline);
+  box-shadow: none;
+}
+
 .supporting {
   margin-top: 4px;
   padding: 0 16px;

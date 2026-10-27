@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { cx } from '../../lib/cx'
 import styles from './OutlinedField.module.css'
 
 export type SelectOption = { value: string; label: string }
@@ -20,29 +21,30 @@ export function SelectField({
   value,
   options,
   placeholder,
-  legend = 'Label',
-  supportingText = 'Supporting text',
+  legend,
+  supportingText,
   error,
   className,
   onChange,
 }: SelectFieldProps) {
   const id = useId()
   const supportingId = `${id}-supporting`
+  const supporting = error ?? supportingText
 
   return (
-    <div className={[styles.field, error && styles.error, className].filter(Boolean).join(' ')}>
+    <div className={cx(styles.field, error && styles.error, className)}>
       <label htmlFor={id} className={styles.title}>
         {title}
       </label>
       <div className={styles.box}>
-        <span className={styles.legend}>{legend}</span>
+        {legend && <span className={styles.legend}>{legend}</span>}
         <select
           id={id}
           className={styles.control}
           value={value}
           required
           aria-invalid={Boolean(error)}
-          aria-describedby={supportingId}
+          aria-describedby={supporting ? supportingId : undefined}
           onChange={(event) => onChange(event.target.value)}
         >
           <option value="" disabled>
@@ -55,9 +57,11 @@ export function SelectField({
           ))}
         </select>
       </div>
-      <span id={supportingId} className={styles.supporting}>
-        {error ?? supportingText}
-      </span>
+      {supporting && (
+        <span id={supportingId} className={styles.supporting}>
+          {supporting}
+        </span>
+      )}
     </div>
   )
 }

@@ -10,6 +10,15 @@
   background: var(--color-surface);
 }
 
+.compact {
+  width: min(520px, 100%);
+  min-height: 0;
+}
+
+.compact .body {
+  margin-top: 36px;
+}
+
 .title {
   font-size: 28px;
   font-weight: 700;

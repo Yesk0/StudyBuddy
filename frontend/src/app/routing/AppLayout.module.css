@@ -1,0 +1,31 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 32px 16px;
+}
+
+/* Pages marked data-fill-height (chats) take exactly the space left under the header. */
+.shell:has([data-fill-height]) {
+  height: 100dvh;
+}
+
+.shell:has([data-fill-height]) .main {
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .main {
+    padding: 20px 12px;
+  }
+
+  .shell:has([data-fill-height]) [data-reminder] {
+    display: none;
+  }
+}
