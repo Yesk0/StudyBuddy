@@ -34,3 +34,15 @@ export const EMPTY_PROFILE_DRAFT: ProfileDraft = {
   studyFormat: 'either',
   studyDays: ['mon', 'wed', 'fri'],
 }
+
+export function yearLabel(year: number): string {
+  return YEAR_OPTIONS.find((option) => option.value === String(year))?.label ?? `Year ${year}`
+}
+
+export function studyFormatLabel(format: StudyFormat): string {
+  return STUDY_FORMAT_OPTIONS.find((option) => option.value === format)?.label ?? format
+}
+
+export function studyDayLabel(day: StudyDay): string {
+  return STUDY_DAY_OPTIONS.find((option) => option.value === day)?.label ?? day
+}

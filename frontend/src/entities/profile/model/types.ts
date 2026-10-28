@@ -15,7 +15,6 @@ export type ProfileDraft = {
 
 export type ProfileDto = {
   full_name: string
-  email: string
   university: string
   year_of_study: number
   major: string
@@ -24,4 +23,18 @@ export type ProfileDto = {
   study_days: StudyDay[]
 }
 
-export type Profile = ProfileDto & { id: number }
+/** The public part of a profile that other students can see. */
+export type ProfileSummary = {
+  user_id: number
+  full_name: string
+  university: string
+  year_of_study: number
+  major: string
+}
+
+export type Profile = ProfileSummary & {
+  email: string
+  courses: string[]
+  study_format: StudyFormat
+  study_days: StudyDay[]
+}

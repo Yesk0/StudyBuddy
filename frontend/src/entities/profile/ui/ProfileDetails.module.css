@@ -1,0 +1,53 @@
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.identity {
+  flex: 1;
+  min-width: 200px;
+}
+
+.name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.email {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px 24px;
+  padding-top: 24px;
+}
+
+.label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.value {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+@media (max-width: 640px) {
+  .facts {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .value {
+    margin-bottom: 12px;
+  }
+}
