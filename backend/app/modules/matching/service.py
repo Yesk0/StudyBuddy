@@ -1,20 +1,28 @@
-from fastapi import HTTPException, status
-from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.chat.models import Connection
-from app.modules.chat.service import partner_id
+from app.common.workflow import PENDING, status_after
+from app.modules.chat.service import list_connections_of, partner_id
 from app.modules.matching.schemas import MatchCandidate, MatchStatus
-from app.modules.profiles.models import Course, Profile, profile_courses
-from app.modules.profiles.schemas import WEEK_ORDER, course_slug
-from app.modules.profiles.service import require_profile
-from app.modules.study_requests.models import StudyRequest
+from app.modules.profiles.models import Profile
+from app.modules.profiles.schemas import WEEK_ORDER
+from app.modules.profiles.service import (
+    find_course_id,
+    list_profiles_sharing_courses,
+    require_profile,
+)
+from app.modules.study_requests.service import list_open_involving
 from app.modules.users.models import User
 
 # Rule-based score out of 100: shared courses matter most, then schedule overlap.
 COURSE_WEIGHT = 60
 DAY_WEIGHT = 30
 FORMAT_WEIGHT = 10
+MAX_RESULTS = 50
+
+DECLINED = status_after("decline")
+
+Relationship = tuple[MatchStatus, int | None, int | None]
+NO_RELATIONSHIP: Relationship = ("none", None, None)
 
 
 def formats_compatible(first: str, second: str) -> bool:
@@ -30,86 +38,65 @@ def score(
     return round(course_part + day_part + format_part)
 
 
-async def _relationships(
-    session: AsyncSession, user_id: int
-) -> dict[int, tuple[MatchStatus, int | None, int | None]]:
+async def _relationships(session: AsyncSession, user_id: int) -> dict[int, Relationship]:
     """Map other user id -> (status, request_id, connection_id)."""
-    result: dict[int, tuple[MatchStatus, int | None, int | None]] = {}
-
-    requests = await session.scalars(
-        select(StudyRequest)
-        .where(
-            or_(StudyRequest.sender_id == user_id, StudyRequest.receiver_id == user_id),
-            StudyRequest.status.in_(("pending", "declined")),
-        )
-        .order_by(StudyRequest.id)
-    )
-    for request in requests:
+    result: dict[int, Relationship] = {}
+    for request in await list_open_involving(session, user_id, (PENDING, DECLINED)):
         outgoing = request.sender_id == user_id
         other = request.receiver_id if outgoing else request.sender_id
-        if request.status == "pending":
+        if request.status == PENDING:
             result[other] = ("outgoing" if outgoing else "incoming", request.id, None)
         elif outgoing and other not in result:
             result[other] = ("declined", request.id, None)
 
-    connections = await session.scalars(
-        select(Connection).where(
-            or_(Connection.user_a_id == user_id, Connection.user_b_id == user_id)
-        )
-    )
-    for connection in connections:
+    for connection in await list_connections_of(session, user_id):
         result[partner_id(connection, user_id)] = ("connected", None, connection.id)
     return result
+
+
+def _candidate(me: Profile, profile: Profile, relationship: Relationship) -> MatchCandidate:
+    my_course_ids = {course.id for course in me.courses}
+    shared_courses = sorted(c.name for c in profile.courses if c.id in my_course_ids)
+    shared_days = [day for day in WEEK_ORDER if day in me.study_days and day in profile.study_days]
+    match_status, request_id, connection_id = relationship
+    return MatchCandidate(
+        user_id=profile.user_id,
+        full_name=profile.full_name,
+        university=profile.university,
+        year_of_study=profile.year_of_study,
+        major=profile.major,
+        study_format=profile.study_format,
+        shared_courses=shared_courses,
+        shared_days=shared_days,
+        score=score(
+            len(my_course_ids),
+            len(shared_courses),
+            len(me.study_days),
+            len(shared_days),
+            formats_compatible(me.study_format, profile.study_format),
+        ),
+        status=match_status,
+        request_id=request_id,
+        connection_id=connection_id,
+    )
 
 
 async def find_matches(
     session: AsyncSession, user: User, course: str | None
 ) -> list[MatchCandidate]:
     me = await require_profile(session, user.id)
-    my_courses = {c.id: c.name for c in me.courses}
-    my_days = set(me.study_days)
-
-    target_ids = set(my_courses)
+    target_ids = {c.id for c in me.courses}
     if course:
-        course_id = await session.scalar(select(Course.id).where(Course.slug == course_slug(course)))
+        course_id = await find_course_id(session, course)
         if course_id is None:
             return []
         target_ids = {course_id}
 
-    candidate_ids = select(profile_courses.c.profile_id).where(
-        profile_courses.c.course_id.in_(target_ids),
-        profile_courses.c.profile_id != user.id,
-    )
-    candidates = await session.scalars(select(Profile).where(Profile.user_id.in_(candidate_ids)))
+    candidates = await list_profiles_sharing_courses(session, target_ids, exclude_user_id=user.id)
     relationships = await _relationships(session, user.id)
-
-    matches = []
-    for profile in candidates:
-        shared_courses = sorted(c.name for c in profile.courses if c.id in my_courses)
-        shared_days = [day for day in WEEK_ORDER if day in my_days and day in profile.study_days]
-        match_status, request_id, connection_id = relationships.get(profile.user_id, ("none", None, None))
-        matches.append(
-            MatchCandidate(
-                user_id=profile.user_id,
-                full_name=profile.full_name,
-                university=profile.university,
-                year_of_study=profile.year_of_study,
-                major=profile.major,
-                study_format=profile.study_format,
-                shared_courses=shared_courses,
-                shared_days=shared_days,
-                score=score(
-                    len(my_courses),
-                    len(shared_courses),
-                    len(my_days),
-                    len(shared_days),
-                    formats_compatible(me.study_format, profile.study_format),
-                ),
-                status=match_status,
-                request_id=request_id,
-                connection_id=connection_id,
-            )
-        )
-
+    matches = [
+        _candidate(me, profile, relationships.get(profile.user_id, NO_RELATIONSHIP))
+        for profile in candidates
+    ]
     matches.sort(key=lambda match: (-match.score, match.full_name.lower()))
-    return matches[:50]
+    return matches[:MAX_RESULTS]
