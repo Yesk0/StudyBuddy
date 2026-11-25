@@ -1,8 +1,8 @@
 from collections.abc import AsyncIterator
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
@@ -29,6 +29,14 @@ engine = create_async_engine(
     **({"poolclass": NullPool} if _is_sqlite else {"pool_pre_ping": True}),
 )
 SessionFactory = async_sessionmaker(engine, expire_on_commit=False)
+
+if _is_sqlite:
+    # SQLite ignores foreign keys (and ON DELETE CASCADE) unless asked to enforce them.
+    @event.listens_for(engine.sync_engine, "connect")
+    def _enable_sqlite_foreign_keys(dbapi_connection: Any, _record: Any) -> None:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:

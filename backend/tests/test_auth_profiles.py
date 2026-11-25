@@ -16,9 +16,7 @@ def test_register_login_and_me(client):
     wrong = client.post("/api/auth/login", json={"email": "ann@kbtu.kz", "password": "nope-nope"})
     assert wrong.status_code == 401
 
-    login = client.post(
-        "/api/auth/login", json={"email": "ann@kbtu.kz", "password": "password123"}
-    )
+    login = client.post("/api/auth/login", json={"email": "ann@kbtu.kz", "password": "password123"})
     assert login.status_code == 200
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
 

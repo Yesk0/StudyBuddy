@@ -46,18 +46,28 @@ def test_request_lifecycle(client, make_user):
     reverse = client.post("/api/requests", headers=bob["headers"], json={"receiver_id": ann["id"]})
     assert reverse.status_code == 409
 
-    statuses = {m["user_id"]: m["status"] for m in client.get("/api/matches", headers=ann["headers"]).json()}
+    statuses = {
+        m["user_id"]: m["status"] for m in client.get("/api/matches", headers=ann["headers"]).json()
+    }
     assert statuses[bob["id"]] == "outgoing"
 
-    incoming = client.get("/api/requests", headers=bob["headers"], params={"box": "incoming"}).json()
+    incoming = client.get(
+        "/api/requests", headers=bob["headers"], params={"box": "incoming"}
+    ).json()
     assert [r["id"] for r in incoming] == [request["id"]]
 
     # Only the receiver can accept.
-    assert client.post(f"/api/requests/{request['id']}/accept", headers=ann["headers"]).status_code == 403
+    assert (
+        client.post(f"/api/requests/{request['id']}/accept", headers=ann["headers"]).status_code
+        == 403
+    )
     accepted = client.post(f"/api/requests/{request['id']}/accept", headers=bob["headers"]).json()
     assert accepted["status"] == "accepted"
     assert accepted["connection_id"] is not None
-    assert client.post(f"/api/requests/{request['id']}/decline", headers=bob["headers"]).status_code == 409
+    assert (
+        client.post(f"/api/requests/{request['id']}/decline", headers=bob["headers"]).status_code
+        == 409
+    )
 
     statuses = {m["user_id"]: m for m in client.get("/api/matches", headers=ann["headers"]).json()}
     assert statuses[bob["id"]]["status"] == "connected"
@@ -78,7 +88,9 @@ def test_declined_request_blocks_resend(client, make_user):
 
     resend = client.post("/api/requests", headers=ann["headers"], json={"receiver_id": bob["id"]})
     assert resend.status_code == 409
-    statuses = {m["user_id"]: m["status"] for m in client.get("/api/matches", headers=ann["headers"]).json()}
+    statuses = {
+        m["user_id"]: m["status"] for m in client.get("/api/matches", headers=ann["headers"]).json()
+    }
     assert statuses[bob["id"]] == "declined"
 
 
@@ -88,7 +100,10 @@ def test_cancel_request(client, make_user):
     request = client.post(
         "/api/requests", headers=ann["headers"], json={"receiver_id": bob["id"]}
     ).json()
-    assert client.post(f"/api/requests/{request['id']}/cancel", headers=bob["headers"]).status_code == 403
+    assert (
+        client.post(f"/api/requests/{request['id']}/cancel", headers=bob["headers"]).status_code
+        == 403
+    )
     cancelled = client.post(f"/api/requests/{request['id']}/cancel", headers=ann["headers"]).json()
     assert cancelled["status"] == "cancelled"
     # After cancelling, a new request is allowed.

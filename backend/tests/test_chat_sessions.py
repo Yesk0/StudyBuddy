@@ -26,7 +26,9 @@ def test_chat_messages(client, make_user):
         f"/api/connections/{connection_id}/messages", headers=bob["headers"], json={"body": "Hey"}
     )
 
-    messages = client.get(f"/api/connections/{connection_id}/messages", headers=bob["headers"]).json()
+    messages = client.get(
+        f"/api/connections/{connection_id}/messages", headers=bob["headers"]
+    ).json()
     assert [m["body"] for m in messages] == ["Hi Bob!", "Hey"]
     older = client.get(
         f"/api/connections/{connection_id}/messages",
@@ -40,7 +42,10 @@ def test_chat_messages(client, make_user):
     assert connections[0]["shared_courses"] == ["Databases"]
     assert connections[0]["last_message"]["body"] == "Hey"
 
-    assert client.get(f"/api/connections/{connection_id}/messages", headers=eve["headers"]).status_code == 404
+    assert (
+        client.get(f"/api/connections/{connection_id}/messages", headers=eve["headers"]).status_code
+        == 404
+    )
     assert (
         client.post(
             f"/api/connections/{connection_id}/messages", headers=eve["headers"], json={"body": "x"}
@@ -49,7 +54,9 @@ def test_chat_messages(client, make_user):
     )
     assert (
         client.post(
-            f"/api/connections/{connection_id}/messages", headers=ann["headers"], json={"body": "  "}
+            f"/api/connections/{connection_id}/messages",
+            headers=ann["headers"],
+            json={"body": "  "},
         ).status_code
         == 422
     )
@@ -83,22 +90,31 @@ def test_session_proposal_flow(client, make_user):
     assert session["status"] == "proposed"
     assert session["starts_at"].endswith("Z") or session["starts_at"].endswith("+00:00")
 
-    messages = client.get(f"/api/connections/{connection_id}/messages", headers=bob["headers"]).json()
+    messages = client.get(
+        f"/api/connections/{connection_id}/messages", headers=bob["headers"]
+    ).json()
     assert messages[-1]["session"]["id"] == session["id"]
 
-    assert client.post(f"/api/sessions/{session['id']}/accept", headers=ann["headers"]).status_code == 403
+    assert (
+        client.post(f"/api/sessions/{session['id']}/accept", headers=ann["headers"]).status_code
+        == 403
+    )
     accepted = client.post(f"/api/sessions/{session['id']}/accept", headers=bob["headers"]).json()
     assert accepted["status"] == "accepted"
 
     upcoming = client.get("/api/sessions", headers=ann["headers"]).json()
     assert [s["id"] for s in upcoming] == [session["id"]]
     assert upcoming[0]["partner"]["full_name"] == "Bob"
-    assert client.get("/api/sessions", headers=ann["headers"], params={"scope": "past"}).json() == []
+    assert (
+        client.get("/api/sessions", headers=ann["headers"], params={"scope": "past"}).json() == []
+    )
 
     cancelled = client.post(f"/api/sessions/{session['id']}/cancel", headers=ann["headers"]).json()
     assert cancelled["status"] == "cancelled"
     assert client.get("/api/sessions", headers=bob["headers"]).json() == []
-    past_sessions = client.get("/api/sessions", headers=bob["headers"], params={"scope": "past"}).json()
+    past_sessions = client.get(
+        "/api/sessions", headers=bob["headers"], params={"scope": "past"}
+    ).json()
     assert [s["id"] for s in past_sessions] == [session["id"]]
 
 
@@ -117,7 +133,9 @@ def test_websocket_events(client, make_user):
         assert event["type"] == "request.created"
         assert event["payload"]["id"] == request["id"]
 
-        accepted = client.post(f"/api/requests/{request['id']}/accept", headers=bob["headers"]).json()
+        accepted = client.post(
+            f"/api/requests/{request['id']}/accept", headers=bob["headers"]
+        ).json()
         assert socket.receive_json()["type"] == "request.updated"
 
         client.post(
