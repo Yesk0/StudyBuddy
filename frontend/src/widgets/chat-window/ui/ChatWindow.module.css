@@ -35,47 +35,8 @@
   color: var(--color-text-muted);
 }
 
-.messages {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 0;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.day {
-  align-self: center;
-  margin: 8px 0;
-  padding: 4px 12px;
-  border-radius: 12px;
-  background: var(--color-bg);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-muted);
-}
-
 .session {
   width: min(460px, 100%);
-}
-
-.sessionRow {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.sessionMine {
-  justify-content: flex-end;
-}
-
-.start {
-  margin: auto;
-  max-width: 360px;
-  font-size: 14px;
-  line-height: 20px;
-  text-align: center;
-  color: var(--color-text-muted);
 }
 
 .bottom {
@@ -93,7 +54,6 @@
     display: inline-flex;
   }
 
-  .messages,
   .header,
   .bottom {
     padding-left: 14px;

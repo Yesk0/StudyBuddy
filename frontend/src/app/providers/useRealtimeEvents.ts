@@ -1,6 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { appendMessageToCache, connectionKeys, type Message } from '@/entities/connection'
+import {
+  appendMessageToCache,
+  connectionKeys,
+  messageKeys,
+  type Message,
+} from '@/entities/connection'
+import { forumKeys } from '@/entities/forum-post'
+import { groupKeys } from '@/entities/group'
 import { matchKeys } from '@/entities/match'
 import { requestKeys } from '@/entities/study-request'
 import { sessionKeys, type StudySession } from '@/entities/study-session'
@@ -25,13 +32,26 @@ export function useRealtimeEvents(token: string | null): void {
         case 'message.created': {
           const message = event.payload as Message
           appendMessageToCache(queryClient, message)
-          invalidate(connectionKeys.list)
+          if (message.connection_id !== null) invalidate(connectionKeys.list)
           if (message.session) invalidate(sessionKeys.all)
           break
         }
         case 'session.updated': {
           const session = event.payload as StudySession
-          invalidate(sessionKeys.all, connectionKeys.messages(session.connection_id))
+          invalidate(sessionKeys.all)
+          if (session.group_id !== null) {
+            invalidate(messageKeys.thread({ kind: 'group', id: session.group_id }))
+          } else if (session.connection_id !== null) {
+            invalidate(messageKeys.thread({ kind: 'connection', id: session.connection_id }))
+          }
+          break
+        }
+        case 'group.updated':
+          invalidate(groupKeys.all, sessionKeys.all)
+          break
+        case 'forum.updated': {
+          const { post_id: postId } = event.payload as { post_id: number }
+          invalidate(forumKeys.detail(postId), forumKeys.lists)
           break
         }
       }

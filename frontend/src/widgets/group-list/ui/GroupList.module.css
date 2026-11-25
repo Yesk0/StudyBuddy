@@ -1,0 +1,12 @@
+.section + .section {
+  margin-top: 36px;
+}
+
+.filters {
+  margin-bottom: 18px;
+}
+
+.list {
+  display: grid;
+  gap: 16px;
+}

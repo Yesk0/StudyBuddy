@@ -15,7 +15,8 @@ class MessageRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    connection_id: int
+    connection_id: int | None
+    group_id: int | None
     sender_id: int
     body: str
     created_at: UtcDatetime

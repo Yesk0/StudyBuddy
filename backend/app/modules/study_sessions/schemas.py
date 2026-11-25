@@ -24,7 +24,8 @@ class StudySessionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    connection_id: int
+    connection_id: int | None
+    group_id: int | None
     proposer_id: int
     title: str
     starts_at: UtcDatetime
@@ -36,5 +37,13 @@ class StudySessionRead(BaseModel):
     responded_at: UtcDatetime | None
 
 
+class GroupRef(BaseModel):
+    id: int
+    name: str
+    owner_id: int
+
+
 class StudySessionListItem(StudySessionRead):
-    partner: ProfileSummary
+    # Exactly one of these is set: the partner for pair sessions, the group for group sessions.
+    partner: ProfileSummary | None
+    group: GroupRef | None

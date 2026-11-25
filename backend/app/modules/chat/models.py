@@ -29,31 +29,34 @@ class Connection(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_a_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    user_b_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), index=True
-    )
+    user_b_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     request_id: Mapped[int | None] = mapped_column(
         ForeignKey("study_requests.id", ondelete="SET NULL")
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Message(Base):
+    """A chat message in either a one-to-one connection or a study group."""
+
     __tablename__ = "messages"
-    __table_args__ = (Index("ix_messages_connection_id_id", "connection_id", "id"),)
+    __table_args__ = (
+        Index("ix_messages_connection_id_id", "connection_id", "id"),
+        Index("ix_messages_group_id_id", "group_id", "id"),
+        CheckConstraint("(connection_id IS NULL) <> (group_id IS NULL)", name="one_thread"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    connection_id: Mapped[int] = mapped_column(ForeignKey("connections.id", ondelete="CASCADE"))
+    connection_id: Mapped[int | None] = mapped_column(
+        ForeignKey("connections.id", ondelete="CASCADE")
+    )
+    group_id: Mapped[int | None] = mapped_column(ForeignKey("study_groups.id", ondelete="CASCADE"))
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     body: Mapped[str] = mapped_column(Text, default="")
-    # Set when the message announces a study session proposal.
+    # Set when the message announces a study session.
     session_id: Mapped[int | None] = mapped_column(
         ForeignKey("study_sessions.id", ondelete="CASCADE")
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     session: Mapped["StudySession | None"] = relationship(lazy="selectin")

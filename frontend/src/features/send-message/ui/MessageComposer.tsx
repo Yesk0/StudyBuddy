@@ -1,30 +1,22 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
-import { appendMessageToCache, connectionKeys, sendMessage } from '@/entities/connection'
+import type { Thread } from '@/entities/connection'
 import { errorMessage } from '@/shared/api'
 import { Button } from '@/shared/ui'
+import { useSendMessage } from '../model/useSendMessage'
 import styles from './MessageComposer.module.css'
 
 const MAX_LENGTH = 2000
 
-export function MessageComposer({ connectionId }: { connectionId: number }) {
-  const queryClient = useQueryClient()
+export function MessageComposer({ thread }: { thread: Thread }) {
   const [body, setBody] = useState('')
-
-  const send = useMutation({
-    mutationFn: (text: string) => sendMessage(connectionId, text),
-    onSuccess: (message) => {
-      appendMessageToCache(queryClient, message)
-      queryClient.invalidateQueries({ queryKey: connectionKeys.list })
-    },
-    onError: (_error, text) => setBody(text),
-  })
+  const send = useSendMessage(thread)
 
   const submit = () => {
     const text = body.trim()
     if (!text || send.isPending) return
     setBody('')
-    send.mutate(text)
+    // Clear right away; put the text back if sending fails.
+    send.mutate(text, { onError: () => setBody(text) })
   }
 
   const handleSubmit = (event: FormEvent) => {

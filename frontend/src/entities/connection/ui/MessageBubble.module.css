@@ -27,6 +27,13 @@
   color: var(--color-on-primary);
 }
 
+.sender {
+  margin: 4px 0 4px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
 .time {
   margin-top: 4px;
   padding: 0 4px;

@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { connectionKeys } from '@/entities/connection'
-import { proposeSession, sessionKeys, type SessionFormat } from '@/entities/study-session'
+import type { Thread } from '@/entities/connection'
+import type { SessionFormat } from '@/entities/study-session'
 import { errorMessage } from '@/shared/api'
 import { TIME, toDateTimeLocalValue } from '@/shared/lib'
 import { Button, Chip, ChipGroup, SelectField, TextField } from '@/shared/ui'
+import { useProposeSession } from '../model/useProposeSession'
 import styles from './ProposeSessionForm.module.css'
 
 const DURATION_OPTIONS = [
@@ -29,13 +29,13 @@ function tomorrowAtSix(): string {
 type Errors = { title?: string; startsAt?: string }
 
 type ProposeSessionFormProps = {
-  connectionId: number
+  /** The pair chat or group the session is planned in. */
+  thread: Thread
   defaultTitle: string
   onDone: () => void
 }
 
-export function ProposeSessionForm({ connectionId, defaultTitle, onDone }: ProposeSessionFormProps) {
-  const queryClient = useQueryClient()
+export function ProposeSessionForm({ thread, defaultTitle, onDone }: ProposeSessionFormProps) {
   const [title, setTitle] = useState(defaultTitle)
   const [startsAt, setStartsAt] = useState(tomorrowAtSix)
   const [duration, setDuration] = useState('90')
@@ -43,22 +43,7 @@ export function ProposeSessionForm({ connectionId, defaultTitle, onDone }: Propo
   const [location, setLocation] = useState('')
   const [errors, setErrors] = useState<Errors>({})
 
-  const propose = useMutation({
-    mutationFn: () =>
-      proposeSession(connectionId, {
-        title: title.trim(),
-        starts_at: new Date(startsAt).toISOString(),
-        duration_minutes: Number(duration),
-        format,
-        location: location.trim(),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: connectionKeys.messages(connectionId) })
-      queryClient.invalidateQueries({ queryKey: connectionKeys.list })
-      queryClient.invalidateQueries({ queryKey: sessionKeys.all })
-      onDone()
-    },
-  })
+  const propose = useProposeSession(thread)
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -66,12 +51,24 @@ export function ProposeSessionForm({ connectionId, defaultTitle, onDone }: Propo
     if (!title.trim()) next.title = 'Add a short title'
     if (!startsAt || new Date(startsAt).getTime() <= Date.now()) next.startsAt = 'Pick a time in the future'
     setErrors(next)
-    if (Object.keys(next).length === 0) propose.mutate()
+    if (Object.keys(next).length > 0) return
+    propose.mutate(
+      {
+        title: title.trim(),
+        starts_at: new Date(startsAt).toISOString(),
+        duration_minutes: Number(duration),
+        format,
+        location: location.trim(),
+      },
+      { onSuccess: onDone },
+    )
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <h3 className={styles.heading}>Propose a study session</h3>
+      <h3 className={styles.heading}>
+        {thread.kind === 'group' ? 'Schedule a group session' : 'Propose a study session'}
+      </h3>
       <TextField
         title="What will you study?"
         placeholder="e.g. Databases midterm prep"
@@ -135,7 +132,7 @@ export function ProposeSessionForm({ connectionId, defaultTitle, onDone }: Propo
           Cancel
         </Button>
         <Button type="submit" size="md" disabled={propose.isPending}>
-          {propose.isPending ? 'Sending…' : 'Send proposal'}
+          {propose.isPending ? 'Sending…' : thread.kind === 'group' ? 'Schedule' : 'Send proposal'}
         </Button>
       </div>
     </form>

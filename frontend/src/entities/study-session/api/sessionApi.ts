@@ -6,8 +6,12 @@ import type {
   StudySessionListItem,
 } from '../model/types'
 
-export function proposeSession(connectionId: number, dto: StudySessionDto): Promise<StudySession> {
-  return postJson<StudySession>(`/connections/${connectionId}/sessions`, dto)
+/** Where a session is planned: a one-to-one chat or a study group. */
+export type SessionHost = { kind: 'connection' | 'group'; id: number }
+
+export function proposeSession(host: SessionHost, dto: StudySessionDto): Promise<StudySession> {
+  const base = host.kind === 'group' ? 'groups' : 'connections'
+  return postJson<StudySession>(`/${base}/${host.id}/sessions`, dto)
 }
 
 export function listSessions(scope: SessionScope): Promise<StudySessionListItem[]> {

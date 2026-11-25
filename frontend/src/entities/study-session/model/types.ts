@@ -6,7 +6,10 @@ export type SessionScope = 'upcoming' | 'past'
 
 export type StudySession = {
   id: number
-  connection_id: number
+  /** Set for sessions of a connected pair. */
+  connection_id: number | null
+  /** Set for sessions of a study group. */
+  group_id: number | null
   proposer_id: number
   title: string
   starts_at: string
@@ -18,7 +21,10 @@ export type StudySession = {
   responded_at: string | null
 }
 
-export type StudySessionListItem = StudySession & { partner: ProfileSummary }
+export type StudySessionListItem = StudySession & {
+  partner: ProfileSummary | null
+  group: { id: number; name: string; owner_id: number } | null
+}
 
 export type StudySessionDto = {
   title: string

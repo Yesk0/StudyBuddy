@@ -1,38 +1,30 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { connectionKeys } from '@/entities/connection'
-import {
-  respondToSession,
-  sessionKeys,
-  type SessionAction,
-  type StudySession,
-} from '@/entities/study-session'
+import type { StudySession } from '@/entities/study-session'
 import { errorMessage } from '@/shared/api'
 import { useNow } from '@/shared/lib'
 import { Button } from '@/shared/ui'
+import { useRespondToSession } from '../model/useRespondToSession'
 import styles from './SessionActions.module.css'
 
 type SessionActionsProps = {
   session: StudySession
   viewerId: number
+  /** For group sessions: the owner may cancel any session of the group. */
+  groupOwnerId?: number
 }
 
-export function SessionActions({ session, viewerId }: SessionActionsProps) {
-  const queryClient = useQueryClient()
-  const respond = useMutation({
-    mutationFn: (action: SessionAction) => respondToSession(session.id, action),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: sessionKeys.all })
-      queryClient.invalidateQueries({ queryKey: connectionKeys.messages(session.connection_id) })
-    },
-  })
+export function SessionActions({ session, viewerId, groupOwnerId }: SessionActionsProps) {
+  const respond = useRespondToSession(session)
 
   const now = useNow()
   const started = new Date(session.starts_at).getTime() <= now
   const mine = session.proposer_id === viewerId
+  const isGroup = session.group_id !== null
+  const active = session.status === 'proposed' || session.status === 'accepted'
+  const canCancel = isGroup ? mine || groupOwnerId === viewerId : true
   const busy = respond.isPending
 
   let buttons = null
-  if (session.status === 'proposed' && !mine && !started) {
+  if (!isGroup && session.status === 'proposed' && !mine && !started) {
     buttons = (
       <>
         <Button size="sm" disabled={busy} onClick={() => respond.mutate('accept')}>
@@ -43,7 +35,7 @@ export function SessionActions({ session, viewerId }: SessionActionsProps) {
         </Button>
       </>
     )
-  } else if ((session.status === 'proposed' || session.status === 'accepted') && !started) {
+  } else if (active && !started && canCancel) {
     buttons = (
       <Button size="sm" variant="danger" disabled={busy} onClick={() => respond.mutate('cancel')}>
         {session.status === 'proposed' ? 'Withdraw proposal' : 'Cancel session'}
