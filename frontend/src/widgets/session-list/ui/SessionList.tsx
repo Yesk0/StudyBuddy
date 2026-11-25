@@ -1,6 +1,13 @@
 import { useState } from 'react'
-import { SessionCard, useSessions, type StudySessionListItem } from '@/entities/study-session'
+import {
+  SessionCard,
+  sessionCompanion,
+  sessionThreadPath,
+  useSessions,
+  type StudySessionListItem,
+} from '@/entities/study-session'
 import { useViewer } from '@/entities/viewer'
+import { AddToCalendarButton } from '@/features/export-session-ics'
 import { SessionActions } from '@/features/respond-to-session'
 import { errorMessage } from '@/shared/api'
 import { ROUTES } from '@/shared/config'
@@ -16,15 +23,21 @@ import {
 import styles from './SessionList.module.css'
 
 function SessionItem({ session, viewerId }: { session: StudySessionListItem; viewerId: number }) {
+  const companion = sessionCompanion(session)
   return (
     <SessionCard
       session={session}
-      eyebrow={`With ${session.partner.full_name}`}
+      eyebrow={session.group ? `Group · ${session.group.name}` : `With ${companion}`}
       actions={
         <>
-          <SessionActions session={session} viewerId={viewerId} />
-          <ButtonLink to={ROUTES.chat(session.connection_id)} size="sm" variant="ghost">
-            Open chat
+          <SessionActions
+            session={session}
+            viewerId={viewerId}
+            groupOwnerId={session.group?.owner_id}
+          />
+          <AddToCalendarButton session={session} withWhom={companion} />
+          <ButtonLink to={sessionThreadPath(session)} size="sm" variant="ghost">
+            {session.group ? 'Open group' : 'Open chat'}
           </ButtonLink>
         </>
       }
@@ -89,7 +102,7 @@ export function SessionList() {
         <Panel>
           <EmptyState
             title="No upcoming sessions"
-            text="Open a chat with a study partner and propose a time to study together."
+            text="Propose a time in a chat with a study partner, or schedule one in a study group."
             action={
               <ButtonLink to={ROUTES.chats} variant="secondary">
                 Go to chats

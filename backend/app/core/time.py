@@ -1,7 +1,10 @@
 from datetime import UTC, datetime
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 from pydantic import AfterValidator
+
+from app.core.config import settings
 
 
 def utcnow() -> datetime:
@@ -16,3 +19,9 @@ def as_utc(value: datetime) -> datetime:
 
 
 UtcDatetime = Annotated[datetime, AfterValidator(as_utc)]
+
+
+def format_local(value: datetime) -> str:
+    """Human-readable time in the app's time zone, for emails."""
+    local = as_utc(value).astimezone(ZoneInfo(settings.timezone))
+    return local.strftime("%a, %d %b %Y at %H:%M")

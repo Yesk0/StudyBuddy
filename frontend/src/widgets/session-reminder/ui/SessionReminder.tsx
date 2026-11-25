@@ -2,14 +2,15 @@ import {
   formatSessionTime,
   isSessionInProgress,
   isSessionSoon,
+  sessionCompanion,
+  sessionThreadPath,
   useSessions,
 } from '@/entities/study-session'
-import { ROUTES } from '@/shared/config'
 import { formatFromNow, useNow } from '@/shared/lib'
 import { ButtonLink } from '@/shared/ui'
 import styles from './SessionReminder.module.css'
 
-/** In-app reminder for confirmed sessions in the next 24 hours. */
+/** In-app reminder for confirmed sessions in the next 24 hours (an email is sent as well). */
 export function SessionReminder() {
   const now = useNow()
   const { data: sessions = [] } = useSessions('upcoming')
@@ -32,11 +33,11 @@ export function SessionReminder() {
         </svg>
       </span>
       <p className={styles.text}>
-        <strong>{next.title}</strong> with {next.partner.full_name} {when} · {formatSessionTime(next)}
-        {soon.length > 1 && <span className={styles.more}> · +{soon.length - 1} more today</span>}
+        <strong>{next.title}</strong> with {sessionCompanion(next)} {when} · {formatSessionTime(next)}
+        {soon.length > 1 && <span className={styles.more}> · +{soon.length - 1} more soon</span>}
       </p>
-      <ButtonLink to={ROUTES.chat(next.connection_id)} size="sm" variant="secondary">
-        Open chat
+      <ButtonLink to={sessionThreadPath(next)} size="sm" variant="secondary">
+        {next.group ? 'Open group' : 'Open chat'}
       </ButtonLink>
     </aside>
   )
