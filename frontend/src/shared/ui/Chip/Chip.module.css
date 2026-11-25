@@ -14,7 +14,7 @@
 }
 
 .chip:hover {
-  border-color: #cbd5e1;
+  border-color: var(--color-border-strong);
 }
 
 .chip:focus-visible {
@@ -78,13 +78,13 @@
 
 .tag-warning {
   border-color: transparent;
-  background: #fff4e0;
-  color: #8a5300;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 
 .tag-primary {
   border-color: transparent;
-  background: #efeaf8;
+  background: var(--color-primary-bg);
   color: var(--color-primary);
 }
 

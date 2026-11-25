@@ -20,7 +20,7 @@
 }
 
 .error {
-  background: #fdf1f0;
+  background: var(--color-error-bg);
   color: var(--color-error);
 }
 

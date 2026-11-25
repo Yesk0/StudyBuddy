@@ -67,7 +67,7 @@
 }
 
 .secondary:hover:not(:disabled) {
-  border-color: #cbd5e1;
+  border-color: var(--color-border-strong);
   background: var(--color-bg);
 }
 
@@ -81,13 +81,13 @@
 }
 
 .danger {
-  border-color: #f2c4c0;
+  border-color: var(--color-error-border);
   background: var(--color-surface);
   color: var(--color-error);
 }
 
 .danger:hover:not(:disabled) {
-  background: #fdf1f0;
+  background: var(--color-error-bg);
 }
 
 .back {
