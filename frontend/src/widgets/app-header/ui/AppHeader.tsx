@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router'
 import { useMyProfile } from '@/entities/profile'
 import { usePendingIncomingCount } from '@/entities/study-request'
 import { useLogout } from '@/features/logout'
+import { ThemeToggle } from '@/features/toggle-theme'
 import { ROUTES } from '@/shared/config'
 import { cx } from '@/shared/lib'
 import { Avatar, Badge, Button, ProgressBar } from '@/shared/ui'
@@ -46,11 +47,18 @@ function AppNavigation() {
         <NavLink to={ROUTES.chats} className={navClassName}>
           Chats
         </NavLink>
+        <NavLink to={ROUTES.groups} className={navClassName}>
+          Groups
+        </NavLink>
+        <NavLink to={ROUTES.forum} className={navClassName}>
+          Forum
+        </NavLink>
         <NavLink to={ROUTES.sessions} className={navClassName}>
           Sessions
         </NavLink>
       </nav>
       <div className={styles.account}>
+        <ThemeToggle />
         <NavLink
           to={ROUTES.profile}
           className={({ isActive }) => cx(styles.profileLink, isActive && styles.active)}
@@ -76,8 +84,10 @@ export function AppHeader(props: AppHeaderProps) {
             Step {props.step} of {props.totalSteps}
           </span>
           <ProgressBar value={props.step} max={props.totalSteps} />
+          <ThemeToggle />
         </div>
       )}
+      {props.variant === 'guest' && <ThemeToggle />}
       {props.variant === 'app' && <AppNavigation />}
     </header>
   )

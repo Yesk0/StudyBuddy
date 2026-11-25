@@ -1,0 +1,20 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.search {
+  max-width: 480px;
+}
+
+.list {
+  display: grid;
+  gap: 14px;
+}
+
+.more {
+  display: flex;
+  margin: 20px auto 0;
+}

@@ -1,0 +1,83 @@
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.reach {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reachText {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+}
+
+.reachActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.sent {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.comment {
+  display: flex;
+  gap: 12px;
+}
+
+.commentMain {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.commentHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.commentAuthor {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.commentTime {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.commentBody {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.newComment {
+  margin-top: 4px;
+}

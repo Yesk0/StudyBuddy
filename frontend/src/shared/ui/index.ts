@@ -1,5 +1,6 @@
 export { Avatar } from './Avatar/Avatar'
 export { BackButton, Button, ButtonLink, ForwardLink } from './Button/Button'
+export { ConfirmButton } from './Button/ConfirmButton'
 export { Chip, ChipGroup, Tag, TagList, type TagTone } from './Chip/Chip'
 export { Alert, Badge, EmptyState, PageLoader, Spinner } from './Feedback/Feedback'
 export { FormCard } from './FormCard/FormCard'
