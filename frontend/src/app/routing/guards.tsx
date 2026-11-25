@@ -23,7 +23,8 @@ export function RequireAuth() {
   const location = useLocation()
   const viewer = useViewer()
   const logout = useLogout()
-  useRealtimeEvents(token)
+  // The server only accepts sockets from verified accounts.
+  useRealtimeEvents(viewer.data?.email_verified ? token : null)
 
   if (!token) return <Navigate to={ROUTES.login} replace state={{ from: location.pathname }} />
   if (viewer.isPending) return <PageLoader />
@@ -41,6 +42,22 @@ export function RequireAuth() {
         </div>
       </div>
     )
+  }
+  return <Outlet />
+}
+
+/** New accounts confirm their university email before anything else. */
+export function RequireVerified() {
+  const { data: viewer } = useViewer()
+  if (viewer && !viewer.email_verified) return <Navigate to={ROUTES.verify} replace />
+  return <Outlet />
+}
+
+/** The verification screen is only for accounts that still need it. */
+export function UnverifiedOnly() {
+  const { data: viewer } = useViewer()
+  if (viewer?.email_verified) {
+    return <Navigate to={viewer.has_profile ? ROUTES.matches : ROUTES.onboarding} replace />
   }
   return <Outlet />
 }

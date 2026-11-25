@@ -2,7 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 
 from app.core.database import SessionFactory
 from app.core.realtime import manager
-from app.modules.auth.service import user_from_token
+from app.modules.auth.service import is_verified, user_from_token
 
 router = APIRouter(tags=["realtime"])
 
@@ -12,7 +12,7 @@ async def events(websocket: WebSocket, token: str = "") -> None:
     """Pushes events to the signed-in user: request.*, message.created, session.updated."""
     async with SessionFactory() as session:
         user = await user_from_token(session, token)
-    if user is None:
+    if user is None or not is_verified(user):
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 

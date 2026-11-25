@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.database import DbSession
-from app.modules.auth.service import user_from_token
+from app.modules.auth.service import is_verified, user_from_token
 from app.modules.users.models import User
 
 _bearer = HTTPBearer(auto_error=False)
@@ -25,3 +25,13 @@ async def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+async def get_verified_user(user: CurrentUser) -> User:
+    if not is_verified(user):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Verify your email first")
+    return user
+
+
+# Every feature except signing in and verifying requires a confirmed university email.
+VerifiedUser = Annotated[User, Depends(get_verified_user)]

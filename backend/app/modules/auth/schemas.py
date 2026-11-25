@@ -11,7 +11,12 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class VerifyEmailRequest(BaseModel):
+    code: str = Field(pattern=r"^\d{6}$")
+
+
 class Viewer(BaseModel):
     id: int
     email: str
+    email_verified: bool
     has_profile: bool

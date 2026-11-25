@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -13,6 +14,23 @@ class Settings(BaseSettings):
     # Comma-separated list, e.g. "kbtu.kz". Empty means any domain is accepted.
     allowed_email_domains: str = ""
     api_prefix: str = "/api"
+    # Public address of the frontend, used for links in emails.
+    app_url: str = "http://localhost:5173"
+    # Time zone used to show session times in emails.
+    timezone: str = "Asia/Almaty"
+
+    # "auto" sends through SMTP when SMTP_HOST is set and prints emails to the log otherwise.
+    email_backend: Literal["auto", "smtp", "console", "memory"] = "auto"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_starttls: bool = False
+    smtp_from: str = "StudyBuddy <no-reply@studybuddy.local>"
+
+    email_verification_required: bool = True
+    reminders_enabled: bool = True
+    reminder_check_seconds: int = 60
 
     @cached_property
     def cors_origin_list(self) -> list[str]:

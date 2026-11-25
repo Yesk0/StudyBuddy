@@ -16,3 +16,11 @@ export function login(credentials: Credentials): Promise<TokenResponse> {
 export function getViewer(): Promise<Viewer> {
   return request<Viewer>('/auth/me')
 }
+
+export function verifyEmail(code: string): Promise<void> {
+  return postJson<void>('/auth/verify', { code })
+}
+
+export function resendVerificationCode(): Promise<void> {
+  return postJson<void>('/auth/verify/resend')
+}
