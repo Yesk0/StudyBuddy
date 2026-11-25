@@ -1,45 +1,45 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { matchKeys, type MatchCandidate } from '@/entities/match'
-import { createRequest, requestKeys } from '@/entities/study-request'
 import { errorMessage } from '@/shared/api'
 import { Button, Chip, ChipGroup, TextArea } from '@/shared/ui'
+import { useSendStudyRequest } from '../model/useSendStudyRequest'
 import styles from './SendRequestForm.module.css'
 
 const MAX_MESSAGE_LENGTH = 300
 
 type SendRequestFormProps = {
-  match: MatchCandidate
+  receiverId: number
+  /** Courses to choose from; the first one is preselected. */
+  courses: string[]
   onClose: () => void
+  onSent?: () => void
 }
 
-export function SendRequestForm({ match, onClose }: SendRequestFormProps) {
-  const queryClient = useQueryClient()
-  const [course, setCourse] = useState<string | null>(match.shared_courses[0] ?? null)
+export function SendRequestForm({ receiverId, courses, onClose, onSent }: SendRequestFormProps) {
+  const [course, setCourse] = useState<string | null>(courses[0] ?? null)
   const [message, setMessage] = useState('')
 
-  const send = useMutation({
-    mutationFn: () =>
-      createRequest({ receiver_id: match.user_id, course, message: message.trim() }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: matchKeys.all })
-      queryClient.invalidateQueries({ queryKey: requestKeys.all })
-      onClose()
-    },
-  })
+  const send = useSendStudyRequest()
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    send.mutate()
+    send.mutate(
+      { receiver_id: receiverId, course, message: message.trim() },
+      {
+        onSuccess: () => {
+          onSent?.()
+          onClose()
+        },
+      },
+    )
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      {match.shared_courses.length > 1 && (
+      {courses.length > 1 && (
         <div>
           <p className={styles.label}>Which course do you want to study?</p>
           <ChipGroup>
-            {match.shared_courses.map((name) => (
+            {courses.map((name) => (
               <Chip
                 key={name}
                 selected={course === name}

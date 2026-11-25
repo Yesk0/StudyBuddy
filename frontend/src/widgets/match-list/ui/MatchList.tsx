@@ -117,7 +117,11 @@ export function MatchList() {
                     onCompose={() => setComposingFor(match.user_id)}
                   />
                   {composingFor === match.user_id && match.status === 'none' && (
-                    <SendRequestForm match={match} onClose={() => setComposingFor(null)} />
+                    <SendRequestForm
+                      receiverId={match.user_id}
+                      courses={match.shared_courses}
+                      onClose={() => setComposingFor(null)}
+                    />
                   )}
                 </>
               }
